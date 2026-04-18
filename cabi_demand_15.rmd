@@ -1,0 +1,77 @@
+---
+title: "Collapsing Cabi data"
+author: "Bingo"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Intro
+
+```{r read}
+library(arrow)
+library(tidyverse)
+# load this thing in
+
+cabi <- arrow::read_parquet("C:/Users/bingo/OneDrive - Georgia Institute of Technology/CSE7643/project/cabi_combined_data.parquet")
+
+
+```
+
+# Data engineering
+
+First we need to split the date columns into date and the time. We want to know what time these things happened at. 
+
+```{r convert_date}
+cabi <- cabi %>% 
+  mutate(started_at = lubridate::as_datetime(started_at),
+         ended_at = lubridate::as_datetime(ended_at))
+```
+
+Now that they are dates, lets bucket them into 15 minute intervals
+
+```{r}
+cabi <- cabi %>% 
+  mutate(started_at_15 = lubridate::floor_date(started_at, unit = "15 minutes"),
+         ended_at_15 = lubridate::floor_date(ended_at, unit = "15 minutes"))
+```
+
+Now we can group by the station and the 15 minute intervals and make 2 datasets. One for leavings and one for enterings.
+
+```{r}
+departures <- cabi %>% 
+  group_by(start_station_id, started_at_15) %>% 
+  summarise(deps = n())
+arrivals <- cabi %>% 
+  group_by(end_station_id, ended_at_15) %>% 
+  summarise(arrs = n())
+```
+
+Now lets join them together and calculate demand.
+
+```{r}
+deps_and_arrs <- departures %>% 
+  full_join(arrivals, by = join_by(x$start_station_id == y$end_station_id, x$started_at_15 == y$ended_at_15)) %>% 
+  mutate(demand = arrs - deps)
+```
+
+
+
+# Analysis
+
+Our goal here is to compute the following:
+compute net arrivals - departures by 15 minute intervals
+
+
+
+# write out
+
+```{r}
+deps_and_arrs %>% 
+  arrow::write_parquet(., "C:/Users/bingo/OneDrive - Georgia Institute of Technology/CSE7643/project/cabi_demand_15.parquet")
+```
+
+
