@@ -15,7 +15,7 @@ from pathlib import Path
 LATITUDE   =  38.9072           # Washington, DC
 LONGITUDE  = -77.0369
 START_DATE = date(2021, 1, 1)
-END_DATE   = date(2025, 1, 1)
+END_DATE   = date(2026, 1, 1)
 OUTPUT_FILE = Path("weather_hourly.parquet")
 BASE_URL   = "https://archive-api.open-meteo.com/v1/archive"
 PAUSE      = 0.5   
