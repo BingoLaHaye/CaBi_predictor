@@ -3,7 +3,7 @@ library(tidyverse)
 library(purrr)
 library(arrow)
 
-census_api_key("cb488dd646ea662450853404d4c6e7c8f845f2d1", install = TRUE, overwrite = TRUE)
+census_api_key("API_KEY", install = TRUE, overwrite = TRUE)
 
 
 
