@@ -3,12 +3,12 @@ library(tidyverse)
 library(purrr)
 library(arrow)
 
-census_api_key("API_KEY", install = TRUE, overwrite = TRUE)
+census_api_key("API_key", install = TRUE, overwrite = TRUE)
 
 
 
 years <- 2024 #2021:2024
-states <- c("DC") #"VA", "MD")
+states <- c("DC", "VA", "MD")
 # expand grid
 combinations <- tidyr::expand_grid(years, states)
 # county filters
