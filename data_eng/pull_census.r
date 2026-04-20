@@ -7,8 +7,8 @@ census_api_key("API_KEY", install = TRUE, overwrite = TRUE)
 
 
 
-years <- 2021:2024
-states <- c("DC", "VA", "MD")
+years <- 2024 #2021:2024
+states <- c("DC") #"VA", "MD")
 # expand grid
 combinations <- tidyr::expand_grid(years, states)
 # county filters
