@@ -3,6 +3,8 @@ library(tidyverse)
 library(purrr)
 library(arrow)
 
+library(sf)
+
 census_api_key("API_key", install = TRUE, overwrite = TRUE)
 
 
@@ -13,7 +15,7 @@ states <- c("DC", "VA", "MD")
 combinations <- tidyr::expand_grid(years, states)
 # county filters
 county_filter <- list(
-  VA = c("Arlington", "Fairfax County", "Alexandria city"),
+  VA = c("Arlington", "Fairfax County", "Alexandria city", "Fairfax city", "Falls Church city"),
   MD = c("Montgomery", "Prince George's"),
   DC = NULL  # DC has no counties, get all tracts
 )
@@ -34,7 +36,8 @@ get_census_stuff <- function(year, state) {
       year = year,
       survey = "acs5",
       output = "wide",
-      keep_geo_vars = TRUE
+      keep_geo_vars = TRUE,
+      geometry = TRUE
     ) %>% 
       mutate(year = year, state = state)
    
@@ -45,9 +48,9 @@ results <- purrr::map2(combinations$years, combinations$states, get_census_stuff
 
 # now lets combine it together
 
-census_results <- data.table::rbindlist(results) 
+census_results <- bind_rows(results) 
 
 
 # now we can write out the results
-
-write_parquet(census_results, "C:/Users/bingo/OneDrive - Georgia Institute of Technology/CSE7643/project/census_tract_demographics.parquet")
+sf::st_write(census_results, "C:/Users/bingo/OneDrive - Georgia Institute of Technology/CSE7643/project/census_tract_demographics.gpkg", delete_dsn = TRUE)
+#write_parquet(census_results, "C:/Users/bingo/OneDrive - Georgia Institute of Technology/CSE7643/project/census_tract_demographics.parquet")
